@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: study
+    description: AI study assistant operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /study/status:
+    get:
+      operationId: getStudyStatus
+      tags: [study]
+      summary: Get study assistant availability
+      responses:
+        "200":
+          description: Study assistant availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyStatus"
+  /study/chat:
+    post:
+      operationId: sendStudyMessage
+      tags: [study]
+      summary: Ask the AI study tutor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyChatInput"
+      responses:
+        "200":
+          description: Tutor response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyChatResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Sign in required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Temporary request limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /study/voice:
+    post:
+      operationId: sendStudyVoiceMessage
+      tags: [study]
+      summary: Have a spoken study conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyVoiceInput"
+      responses:
+        "200":
+          description: Spoken tutor response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyVoiceResponse"
+        "400":
+          description: Invalid audio request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Sign in required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Temporary request limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    StudyStatus:
+      type: object
+      properties:
+        available:
+          type: boolean
+        model:
+          type: string
+      required:
+        - available
+        - model
+    StudyMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        imageDataUrl:
+          type: string
+          maxLength: 7000000
+      required:
+        - role
+        - content
+    StudyChatInput:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [tutor, quiz, study_plan, flashcards, summarize]
+        subject:
+          type: string
+          maxLength: 120
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudyMessage"
+      required:
+        - mode
+        - messages
+    StudyChatResponse:
+      type: object
+      properties:
+        answer:
+          type: string
+        model:
+          type: string
+        promptTokens:
+          type: integer
+        completionTokens:
+          type: integer
+      required:
+        - answer
+        - model
+        - promptTokens
+        - completionTokens
+    StudyVoiceInput:
+      type: object
+      properties:
+        audioBase64:
+          type: string
+          maxLength: 18000000
+        audioFormat:
+          type: string
+          enum: [webm, ogg, wav, mp3]
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudyMessage"
+      required:
+        - audioBase64
+        - audioFormat
+        - messages
+    StudyVoiceResponse:
+      type: object
+      properties:
+        transcript:
+          type: string
+        answer:
+          type: string
+        audioBase64:
+          type: string
+        audioMimeType:
+          type: string
+        model:
+          type: string
+      required:
+        - transcript
+        - answer
+        - audioBase64
+        - audioMimeType
+        - model
+

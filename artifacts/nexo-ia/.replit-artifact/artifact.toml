@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Nexo IA"
+description = "Un tutor de inteligencia artificial en español para estudiantes: conversa sobre temas de estudio, organiza sesiones por materia y ayuda a convertir dudas en explicaciones claras, práctica y planes de estudio. Aplicación original para aprendizaje accesible."
+version = "1.0.0"
+id = "artifacts/nexo-ia"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19332
+
+[services.development]
+run = "pnpm --filter @workspace/nexo-ia run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nexo-ia", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nexo-ia/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19332"
+BASE_PATH = "/"
